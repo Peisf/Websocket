@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    
+   <script type="text/javascript" src="utfx.js" ></script>
+    <script src="md5.js"></script>
+    <script type="text/javascript">
+    	
+    	// 二进制转字符串
+    	function parseMessage(str){  	
+					let view = new DataView(str);					
+			        let Strlength = view.getUint32(0);
+					let	offset = 4;
+					let result = []; // Unicode编码字符
+					let end = offset + Strlength;								
+					utfx.decodeUTF8toUTF16(function () {
+					    return offset < end ? view.getUint8(offset++) : null; // 返回null时会退出此转换函数
+					}.bind(this), (char) => {
+					    result.push(char);
+					});
+					
+					let strResult = result.reduce((prev, next)=>{
+					    return prev + String.fromCharCode(next);
+					}, '');
+					return strResult;					
+    	}
+    	
+    	// 字符串转二进制
+    	function abcd(str){
+    			function stringSource(s) {
+    			    //s=s.join('');
+    			    console.log('组合完毕---------------------'+s)
+				    var i = 0;
+				    return function () {
+				        return i < s.length ? s.charCodeAt(i++) : null;
+				    };
+				}			
+				let strCodes = stringSource(str);
+				let length = utfx.calculateUTF16asUTF8(strCodes)[1];
+				let buffer = new ArrayBuffer(length + 4); // 初始化长度为UTF8编码后字符串长度+4个Byte的二进制缓冲区
+				let view = new DataView(buffer);
+				let offset = 4;			
+				view.setUint32(0, length); // 将长度放置在字符串的头部			
+				utfx.encodeUTF16toUTF8(stringSource(str), function (b) {
+				    view.setUint8(offset++, b);
+				}.bind(this));
+				return view;
+    	}  	  	
+    	
+   		function WebSocketTest(){
+			  if ("WebSocket" in window){
+                     var ws = new WebSocket("ws://47.96.149.24:8888/ws");
+                     ws.onopen = function(){
+                     //建立链接并发送数据
+                     ws.binaryType = 'arraybuffer'; // 指定WebSocket接受ArrayBuffer实例作为参数
+                     var data=['0','0','4','0','0','0','7','5','0','0','0','\0','0','0','2','\0','3','0','0','6','3','\0','0','0','3','\0','6','6','6','0','9','9','\0','0','3','2','\0','3','a','e','6','4','5','9','b','9','1','5','d','4','5','b','f','9','e','6','2','5','4','a','f','5','b','5','3','d','8','a','0','0','0','1','\0','0','0','6','\0','6','1','1','6','0','2','b','9','7','1','3','d','1','c','7','f','c','2','9','9','6','b','7','4','8','b','3','5','d','a','c','f','6','e','b','0','1','7'];
+
+                     var str = ['0','0','4','0','0','0','7','5','0','0','0','\0','0','0','2','\0','3','0','0','6','3','\0','0','0','3','\0','6','6','6','0','9','9','\0','0','3','2','\0','3','a','e','6','4','5','9','b','9','1','5','d','4','5','b','f','9','e','6','2','5','4','a','f','5','b','5','3','d','8','a','0','0','0','1','\0','0','0','6','\0','6','1','1','6','0','2'];
+                     str = str.join('');
+                     var hash = hex_md5(str+'yishenglong123');
+                     /*console.log('有效数据---------------------'+str)
+                     console.log('有效数据+yishenglong123------'+hash)*/
+
+                     //var data=['0','0','\0','0']
+                     let view = abcd(data.join(''));
+                     console.log("发送信息");
+                     console.log(view)
+			         ws.send(view);
+			     };
+			     //接收返回的数据
+			     ws.onmessage = function (evt){
+			        let str = evt.data;
+			        let data = parseMessage(str); // 解析二进制数据
+                    console.log('接收到返回的信息')
+					console.log(data);
+			     };
+		     
+			     ws.onerror = function (evt) {
+						console.log('错误');
+   				 };
+			     //关闭连接
+			     ws.onclose = function()
+			     
+			     {			  
+			        console.log("连接已关闭");
+			     };
+			  }else
+			  {			
+			     alert("WebSocket NOT supported by your Browser!");
+			  }
+			}
+    </script>
+</head>
+<body>
+	 <div id="sse">
+   		<a href="javascript:WebSocketTest()">Run WebSocket</a>
+    </div>
+</body>
+</html>

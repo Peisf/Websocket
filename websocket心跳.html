@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<body>
+	</body>
+	<script type="text/javascript">
+		//WebSocket心跳
+		var ws = '';
+		createWebSocket();
+		function createWebSocket() {
+		    try {
+		        ws = new WebSocket(websocketAdd);
+		        init();
+		    } catch(e) {
+		        console.log('catch');
+		        reconnect(websocketAdd);
+		    }
+		}
+		
+		function reconnect(url) {
+		    if(lockReconnect) {
+		        return;
+		    };
+		    lockReconnect = true;
+		    //没连接上会一直重连，设置延迟避免请求过多
+		    tt && clearTimeout(tt);
+		    tt = setTimeout(function() {
+		        createWebSocket(url);
+		        lockReconnect = false;
+		    }, 2000);
+		}
+		
+		var heartCheck = {
+		    timeout: 10000, //60ms
+		    timeoutObj: null,
+		    serverTimeoutObj: null,
+		    reset: function() {
+		        clearTimeout(this.timeoutObj);
+		        clearTimeout(this.serverTimeoutObj);
+		        this.start();
+		    },
+		    start: function() {
+		        var self = this;
+		        this.timeoutObj = setTimeout(function() {
+		            ws.send(JSON.stringify({
+		                "ping": 18212558000
+		            }));
+		            self.serverTimeoutObj = setTimeout(function() {
+		                ws.close(); //如果onclose会执行reconnect，我们执行ws.close()就行了.如果直接执行reconnect 会触发onclose导致重连两次
+		            }, self.timeout)
+		        }, this.timeout)
+		    },
+		}
+		
+		function init() {
+		    ws.onopen = function() {
+		        console.log("open")
+		        heartCheck.start();
+		    };
+		    ws.onmessage = function(event) {
+		        console.log("online")
+		        heartCheck.reset();
+	</script>
+</html>
