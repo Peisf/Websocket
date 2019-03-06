@@ -17,10 +17,14 @@
     for (let i in label){
         var valueLength = labelValue[i].length.toString();
         console.log(getBytes(valueLength));
+        //console.log(valueLength.length)
+        for (var y =0;y<3;y++){
+
+        }
         /*if(valueLength<1000){
 
         }*/
-        console.log(label[i].split('')+'&&&&&&&'+labelValue[i].split(''))
+        //console.log(label[i].split('')+'&&&&&&&'+labelValue[i].split(''))
     }
     function getBytes(str) {
         var byteLen = 0;
@@ -33,6 +37,25 @@
         }
         return byteLen;
     }
+
+    function fn(WSnum,str,bushu){
+        let newBushu = []
+        let newStr = [];
+        if(str.length < WSnum){   // 如果字符的长度小于  定义的位数
+            for(let i = 0 ; i < WSnum-str.length; i++){    // 定义的位数 - 字符的长度  来补0
+                newBushu.push(bushu)
+                console.log(newBushu)
+            }
+            var str1 = str.split('');
+            console.log(str1)
+            newStr = [...newBushu,...str1,'\0']
+            //newStr = newBushu+str;
+        }else{
+            newStr = str
+        }
+        return newStr
+    }
+    console.log(fn(3,'3','0'))
 </script>
 </body>
 </html>
