@@ -8,7 +8,39 @@
    <script type="text/javascript" src="utfx.js" ></script>
     <script src="md5.js"></script>
     <script type="text/javascript">
-    	
+        var label = ['000','001','063','099'];
+        var labelValue = ['30','001','063','8638096e4ddb49a0dd6592c57d9f50ab'];
+        var concactStr='';
+        var hash_md5;
+        var labelLength = fn(3,(label.length.toString()),'0');
+        for (let i in label){
+            var valueLength = labelValue[i].length.toString();
+            var typeLength = fn(3,valueLength,'0');
+            if(valueLength.length>3){
+                typeLength = typeLength
+            }else{
+                typeLength += '\0'
+            }
+            concactStr +=label[i]+'\0'+typeLength+labelValue[i];
+        }
+        var concactStrLength = fn(5,(concactStr.length.toString()),'0');
+        hash_md5 = hex_md5((labelLength+concactStrLength+concactStr)+'yishenglong123');
+        var dataABCD = labelLength+concactStrLength+concactStr+hash_md5;
+
+        function fn(WSnum,str,bushu){
+            let newBushu = []
+            let newStr;
+            if(str.length < WSnum){   // 如果字符的长度小于  定义的位数
+                for(let i = 0 ; i < WSnum-str.length; i++){    // 定义的位数 - 字符的长度  来补0
+                    newBushu.push(bushu)
+                    //console.log(newBushu)
+                }
+                newStr = newBushu.join('')+str
+            }else{
+                newStr = str
+            }
+            return newStr
+        }
     	// 二进制转字符串
     	function parseMessage(str){  	
 					let view = new DataView(str);					
@@ -63,9 +95,9 @@
                      var hash = hex_md5(str+'yishenglong123');
                      /*console.log('有效数据---------------------'+str)
                      console.log('有效数据+yishenglong123------'+hash)*/
-
+                    console.log(data.join(''))
                      //var data=['0','0','\0','0']
-                     let view = abcd(data.join(''));
+                     let view = abcd(dataABCD);
                      console.log("发送信息");
                      console.log(view)
 			         ws.send(view);

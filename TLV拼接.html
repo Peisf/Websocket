@@ -9,23 +9,41 @@
 <script>
     // TLV 4个字节总长度+3字节标签数量+5字节有效数据长度+有效数据+yishenglong123  32字节MD5加密值
     //有效数据格式为：标签名称+0x00+4字节长度
-    var sessionid = hex_md5('099');
+    //var sessionid = hex_md5('099');
     //console.log(sessionid);
     var label = ['000','001','063','099'];
     var labelValue = ['30','001','063','8638096e4ddb49a0dd6592c57d9f50ab'];
     const validData =[];
+    var concactStr='';
+    var hash_md5;
+    //var typeLength=[]
     for (let i in label){
         var valueLength = labelValue[i].length.toString();
-        console.log(getBytes(valueLength));
-        //console.log(valueLength.length)
-        for (var y =0;y<3;y++){
 
+        //console.log(getBytes(valueLength));
+        //console.log(valueLength.length)
+        /*for (var y =0;y<3;y++){
+
+        }*/
+        var typeLength = fn(3,valueLength,'0');
+        if(valueLength.length>3){
+            typeLength = typeLength
+        }else{
+            typeLength += '\0'
         }
+        //console.log([...label[i]]+fn(3,valueLength,'0')+[...labelValue[i]])
+       // typeLength = typeLength.concat([...label[i]]+fn(3,valueLength,'0')+[...labelValue[i]]);
         /*if(valueLength<1000){
 
         }*/
         //console.log(label[i].split('')+'&&&&&&&'+labelValue[i].split(''))
+        //console.log(label[i]+typeLength+labelValue[i])
+        concactStr +=label[i]+'\0'+typeLength+labelValue[i];
     }
+    console.log(concactStr)
+    hash_md5 = hex_md5(concactStr+'yishenglong123');
+    console.log(hash_md5)
+    console.log(concactStr+hash_md5)
     function getBytes(str) {
         var byteLen = 0;
         for ( var i = 0; i < str.length; i++) {
@@ -40,22 +58,19 @@
 
     function fn(WSnum,str,bushu){
         let newBushu = []
-        let newStr = [];
+        let newStr;
         if(str.length < WSnum){   // 如果字符的长度小于  定义的位数
             for(let i = 0 ; i < WSnum-str.length; i++){    // 定义的位数 - 字符的长度  来补0
                 newBushu.push(bushu)
-                console.log(newBushu)
+                //console.log(newBushu)
             }
-            var str1 = str.split('');
-            console.log(str1)
-            newStr = [...newBushu,...str1,'\0']
-            //newStr = newBushu+str;
+            newStr = newBushu.join('')+str
         }else{
             newStr = str
         }
         return newStr
     }
-    console.log(fn(3,'3','0'))
+    //console.log(fn(3,'3','0'))
 </script>
 </body>
 </html>
