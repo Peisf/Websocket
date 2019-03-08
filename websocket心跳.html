@@ -13,7 +13,14 @@
 		function createWebSocket() {
 		    try {
 		        ws = new WebSocket(websocketAdd);
-		        init();
+				ws.onopen = function() {
+					console.log("open")
+					heartCheck.start();
+				};
+				ws.onmessage = function(event) {
+					console.log("online")
+					heartCheck.reset();
+				}
 		    } catch(e) {
 		        console.log('catch');
 		        reconnect(websocketAdd);
@@ -61,7 +68,8 @@
 		        heartCheck.start();
 		    };
 		    ws.onmessage = function(event) {
-		        console.log("online")
-		        heartCheck.reset();
+				console.log("online")
+				heartCheck.reset();
+			}
 	</script>
 </html>

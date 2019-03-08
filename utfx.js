@@ -207,3 +207,55 @@ utfx.calculateUTF16asUTF8 = function(src) {
     });
     return [n,l];
 };
+// 二进制转字符串
+utfx.parseMessage = function (str){
+    let view = new DataView(str);
+    let Strlength = view.getUint32(0);
+    let	offset = 4;
+    let result = []; // Unicode编码字符
+    let end = offset + Strlength;
+    utfx.decodeUTF8toUTF16(function () {
+        return offset < end ? view.getUint8(offset++) : null; // 返回null时会退出此转换函数
+    }.bind(this), (char) => {
+        result.push(char);
+    });
+
+    let strResult = result.reduce((prev, next)=>{
+        return prev + String.fromCharCode(next);
+    }, '');
+    return strResult;
+};
+
+// 字符串转二进制
+utfx.abcd = function (str){
+    function stringSource(s) {
+        var i = 0;
+        return function () {
+            return i < s.length ? s.charCodeAt(i++) : null;
+        };
+    }
+    let strCodes = stringSource(str);
+    let length = utfx.calculateUTF16asUTF8(strCodes)[1];
+    let buffer = new ArrayBuffer(length + 4); // 初始化长度为UTF8编码后字符串长度+4个Byte的二进制缓冲区
+    let view = new DataView(buffer);
+    let offset = 4;
+    view.setUint32(0, length); // 将长度放置在字符串的头部
+    utfx.encodeUTF16toUTF8(stringSource(str), function (b) {
+        view.setUint8(offset++, b);
+    }.bind(this));
+    return view;
+};
+//字节长度计算
+utfx.getBytes = function (Wnum,str,Bnum){
+    let newBushu = []
+    let newStr;
+    if(str.length < Wnum){   // 如果字符的长度小于  定义的位数
+        for(let i = 0 ; i < Wnum-str.length; i++){    // 定义的位数 - 字符的长度  来补0
+            newBushu.push(Bnum)
+        }
+        newStr = newBushu.join('')+str
+    }else{
+        newStr = str
+    }
+    return newStr
+};

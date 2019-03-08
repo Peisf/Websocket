@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <script src="md5.js"></script>
+    <script src="utfx.js"></script>
 </head>
 <body>
 <script>
@@ -13,64 +14,22 @@
     //console.log(sessionid);
     var label = ['000','001','063','099'];
     var labelValue = ['30','001','063','8638096e4ddb49a0dd6592c57d9f50ab'];
-    const validData =[];
     var concactStr='';
     var hash_md5;
-    //var typeLength=[]
     for (let i in label){
         var valueLength = labelValue[i].length.toString();
-
-        //console.log(getBytes(valueLength));
-        //console.log(valueLength.length)
-        /*for (var y =0;y<3;y++){
-
-        }*/
-        var typeLength = fn(3,valueLength,'0');
+        var typeLength = utfx.getBytes(3,valueLength,'0');
         if(valueLength.length>3){
             typeLength = typeLength
         }else{
             typeLength += '\0'
         }
-        //console.log([...label[i]]+fn(3,valueLength,'0')+[...labelValue[i]])
-       // typeLength = typeLength.concat([...label[i]]+fn(3,valueLength,'0')+[...labelValue[i]]);
-        /*if(valueLength<1000){
-
-        }*/
-        //console.log(label[i].split('')+'&&&&&&&'+labelValue[i].split(''))
-        //console.log(label[i]+typeLength+labelValue[i])
         concactStr +=label[i]+'\0'+typeLength+labelValue[i];
     }
-    console.log(concactStr)
-    hash_md5 = hex_md5(concactStr+'yishenglong123');
-    console.log(hash_md5)
-    console.log(concactStr+hash_md5)
-    function getBytes(str) {
-        var byteLen = 0;
-        for ( var i = 0; i < str.length; i++) {
-            if (str.charCodeAt(i) > 255) {
-                byteLen += 2;
-            } else {
-                byteLen += 1;
-            }
-        }
-        return byteLen;
-    }
-
-    function fn(WSnum,str,bushu){
-        let newBushu = []
-        let newStr;
-        if(str.length < WSnum){   // 如果字符的长度小于  定义的位数
-            for(let i = 0 ; i < WSnum-str.length; i++){    // 定义的位数 - 字符的长度  来补0
-                newBushu.push(bushu)
-                //console.log(newBushu)
-            }
-            newStr = newBushu.join('')+str
-        }else{
-            newStr = str
-        }
-        return newStr
-    }
-    //console.log(fn(3,'3','0'))
+    var labelLength = utfx.getBytes(3,(label.length.toString()),'0');
+    var concactStrLength = utfx.getBytes(5,(concactStr.length.toString()),'0');
+    hash_md5 = hex_md5((labelLength+concactStrLength+concactStr)+'yishenglong123');
+    // var dataABCD = labelLength+concactStrLength+concactStr+hash_md5;
 </script>
 </body>
 </html>

@@ -9,13 +9,13 @@
     <script src="md5.js"></script>
     <script type="text/javascript">
         var label = ['000','001','063','099'];
-        var labelValue = ['30','001','063','8638096e4ddb49a0dd6592c57d9f50ab'];
+        var labelValue = ['30','611602','063','8638096e4ddb49a0dd6592c57d9f50ab'];
         var concactStr='';
         var hash_md5;
-        var labelLength = fn(3,(label.length.toString()),'0');
+        var labelLength = utfx.getBytes(3,(label.length.toString()),'0');
         for (let i in label){
             var valueLength = labelValue[i].length.toString();
-            var typeLength = fn(3,valueLength,'0');
+            var typeLength = utfx.getBytes(3,valueLength,'0');
             if(valueLength.length>3){
                 typeLength = typeLength
             }else{
@@ -23,64 +23,11 @@
             }
             concactStr +=label[i]+'\0'+typeLength+labelValue[i];
         }
-        var concactStrLength = fn(5,(concactStr.length.toString()),'0');
+        var concactStrLength = utfx.getBytes(5,(concactStr.length.toString()),'0');
         hash_md5 = hex_md5((labelLength+concactStrLength+concactStr)+'yishenglong123');
         var dataABCD = labelLength+concactStrLength+concactStr+hash_md5;
 
-        function fn(WSnum,str,bushu){
-            let newBushu = []
-            let newStr;
-            if(str.length < WSnum){   // 如果字符的长度小于  定义的位数
-                for(let i = 0 ; i < WSnum-str.length; i++){    // 定义的位数 - 字符的长度  来补0
-                    newBushu.push(bushu)
-                    //console.log(newBushu)
-                }
-                newStr = newBushu.join('')+str
-            }else{
-                newStr = str
-            }
-            return newStr
-        }
-    	// 二进制转字符串
-    	function parseMessage(str){  	
-					let view = new DataView(str);					
-			        let Strlength = view.getUint32(0);
-					let	offset = 4;
-					let result = []; // Unicode编码字符
-					let end = offset + Strlength;								
-					utfx.decodeUTF8toUTF16(function () {
-					    return offset < end ? view.getUint8(offset++) : null; // 返回null时会退出此转换函数
-					}.bind(this), (char) => {
-					    result.push(char);
-					});
-					
-					let strResult = result.reduce((prev, next)=>{
-					    return prev + String.fromCharCode(next);
-					}, '');
-					return strResult;					
-    	}
-    	
-    	// 字符串转二进制
-    	function abcd(str){
-    			function stringSource(s) {
-    			    //s=s.join('');
-    			    console.log('组合完毕---------------------'+s)
-				    var i = 0;
-				    return function () {
-				        return i < s.length ? s.charCodeAt(i++) : null;
-				    };
-				}			
-				let strCodes = stringSource(str);
-				let length = utfx.calculateUTF16asUTF8(strCodes)[1];
-				let buffer = new ArrayBuffer(length + 4); // 初始化长度为UTF8编码后字符串长度+4个Byte的二进制缓冲区
-				let view = new DataView(buffer);
-				let offset = 4;			
-				view.setUint32(0, length); // 将长度放置在字符串的头部			
-				utfx.encodeUTF16toUTF8(stringSource(str), function (b) {
-				    view.setUint8(offset++, b);
-				}.bind(this));
-				return view;
-    	}  	  	
+
     	
    		function WebSocketTest(){
 			  if ("WebSocket" in window){
@@ -97,7 +44,7 @@
                      console.log('有效数据+yishenglong123------'+hash)*/
                     console.log(data.join(''))
                      //var data=['0','0','\0','0']
-                     let view = abcd(dataABCD);
+                     let view = utfx.abcd(dataABCD);
                      console.log("发送信息");
                      console.log(view)
 			         ws.send(view);
@@ -105,7 +52,7 @@
 			     //接收返回的数据
 			     ws.onmessage = function (evt){
 			        let str = evt.data;
-			        let data = parseMessage(str); // 解析二进制数据
+			        let data = utfx.parseMessage(str); // 解析二进制数据
                     console.log('接收到返回的信息')
 					console.log(data);
 			     };
